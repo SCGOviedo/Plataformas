@@ -30,7 +30,9 @@ public:
 	void calculateScroll();
 	Space* space;
 	float scrollX;
+	float scrollY;
 	int mapWidth;
+	int mapHeight;
 	list<Tile*> tiles;
 
 	Audio* audioBackground;

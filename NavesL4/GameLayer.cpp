@@ -10,6 +10,7 @@ GameLayer::GameLayer(Game* game)
 void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
+	scrollY = 0;
 	tiles.clear();
 
 	audioBackground = new Audio("res/musica_ambiente.mp3", true);
@@ -40,9 +41,11 @@ void GameLayer::loadMap(string name) {
 	}
 	else {
 		// Por línea
+		mapHeight = 0;
 		for (int i = 0; getline(streamFile, line); i++) {
 			istringstream streamLine(line);
 			mapWidth = line.length() * 40; // Ancho del mapa en pixels
+			mapHeight += 40;
 			// Por carácter (en cada línea)
 			for (int j = 0; !streamLine.eof(); j++) {
 				streamLine >> character; // Leer character 
@@ -134,7 +137,7 @@ void GameLayer::processControls() {
 
 void GameLayer::update() {
 	// Jugador se cae
-	if (player->y > HEIGHT + 80) {
+	if (player->y > mapHeight + 80) {
 		init();
 	}
 
@@ -165,7 +168,7 @@ void GameLayer::update() {
 	list<Enemy*> deleteEnemies;
 	list<Projectile*> deleteProjectiles;
 	for (auto const& projectile : projectiles) {
-		if (projectile->isInRender(scrollX) == false || projectile->vx == 0) {
+		if (projectile->isInRender(scrollX, scrollY) == false || projectile->vx == 0) {
 
 			bool pInList = std::find(deleteProjectiles.begin(),
 				deleteProjectiles.end(),
@@ -226,7 +229,6 @@ void GameLayer::update() {
 	deleteProjectiles.clear();
 
 
-	cout << "update GameLayer" << endl;
 }
 
 void GameLayer::calculateScroll() {
@@ -243,6 +245,19 @@ void GameLayer::calculateScroll() {
 			scrollX = player->x - WIDTH * 0.7;
 		}
 	}
+	// limite arriba
+	if (player->y > HEIGHT * 0.3) {
+		if (player->y - scrollY < HEIGHT * 0.3) {
+			scrollY = player->y - HEIGHT * 0.3;
+		}
+	}
+
+	// limite abajo
+	if (player->y < mapHeight - HEIGHT * 0.3) {
+		if (player->y - scrollY > HEIGHT * 0.7) {
+			scrollY = player->y - HEIGHT * 0.7;
+		}
+	}
 }
 
 
@@ -251,16 +266,16 @@ void GameLayer::draw() {
 
 	background->draw();
 	for (auto const& tile : tiles) {
-		tile->draw(scrollX);
+		tile->draw(scrollX, scrollY);
 	}
 
 	for (auto const& projectile : projectiles) {
-		projectile->draw(scrollX);
+		projectile->draw(scrollX, scrollY);
 	}
 
-	player->draw(scrollX);
+	player->draw(scrollX, scrollY);
 	for (auto const& enemy : enemies) {
-		enemy->draw(scrollX);
+		enemy->draw(scrollX, scrollY);
 	}
 
 	backgroundPoints->draw();
