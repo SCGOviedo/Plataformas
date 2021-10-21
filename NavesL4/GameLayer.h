@@ -8,6 +8,7 @@
 #include "Projectile.h"
 #include "Text.h"
 #include "Tile.h"
+#include "TileDestruible.h"
 
 #include "Audio.h"
 #include "Space.h" // importar
@@ -32,6 +33,7 @@ public:
 	float scrollX;
 	int mapWidth;
 	list<Tile*> tiles;
+	list<TileDestruible*> tilesDestruibles;
 
 	Audio* audioBackground;
 	Text* textPoints;

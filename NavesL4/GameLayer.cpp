@@ -11,6 +11,7 @@ void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
 	tiles.clear();
+	tilesDestruibles.clear();
 
 	audioBackground = new Audio("res/musica_ambiente.mp3", true);
 	audioBackground->play();
@@ -81,6 +82,14 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		// modificación para empezar a contar desde el suelo.
 		tile->y = tile->y - tile->height / 2;
 		tiles.push_back(tile);
+		space->addStaticActor(tile);
+		break;
+	}
+	case 'W': {
+		TileDestruible* tile = new TileDestruible("res/bloque_metal.png", x, y, game);
+		// modificación para empezar a contar desde el suelo.
+		tile->y = tile->y - tile->height / 2;
+		tilesDestruibles.push_back(tile);
 		space->addStaticActor(tile);
 		break;
 	}
@@ -226,7 +235,29 @@ void GameLayer::update() {
 	deleteProjectiles.clear();
 
 
-	cout << "update GameLayer" << endl;
+	list<TileDestruible*> deleteTiles;
+	for (auto const& tile : tilesDestruibles) {
+		if (player->isOverlap(tile) && player->y < (tile->y-20)) {
+			tile->destroy++;
+			if (tile->destroy >= tile->duracion) {
+				bool pInList = std::find(deleteTiles.begin(),
+					deleteTiles.end(),
+					tile) != deleteTiles.end();
+
+				if (!pInList) {
+					deleteTiles.push_back(tile);
+				}
+			}
+		}
+		else {
+			tile->destroy = 0;
+		}
+	}for (auto const& tile : deleteTiles) {
+		tilesDestruibles.remove(tile);
+		space->removeStaticActor(tile);
+		delete tile;
+	}
+	deleteTiles.clear();
 }
 
 void GameLayer::calculateScroll() {
@@ -253,7 +284,9 @@ void GameLayer::draw() {
 	for (auto const& tile : tiles) {
 		tile->draw(scrollX);
 	}
-
+	for (auto const& tile : tilesDestruibles) {
+		tile->draw(scrollX);
+	}
 	for (auto const& projectile : projectiles) {
 		projectile->draw(scrollX);
 	}
