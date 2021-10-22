@@ -11,6 +11,7 @@ void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
 	tiles.clear();
+	saves.clear();
 
 	audioBackground = new Audio("res/musica_ambiente.mp3", true);
 	audioBackground->play();
@@ -28,6 +29,11 @@ void GameLayer::init() {
 	projectiles.clear(); // Vaciar por si reiniciamos el juego
 
 	loadMap("res/0.txt");
+	
+	if(saved){
+		player->x = saveX;
+		player->y = saveY;
+	}
 }
 
 void GameLayer::loadMap(string name) {
@@ -82,6 +88,14 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		tile->y = tile->y - tile->height / 2;
 		tiles.push_back(tile);
 		space->addStaticActor(tile);
+		break;
+	}
+	case 'A': {
+		Save* save = new Save(x, y, game);
+		// modificación para empezar a contar desde el suelo.
+		save->y = save->y - save->height / 2;
+		saves.push_back(save);
+		space->addDynamicActor(save);
 		break;
 	}
 	}
@@ -225,7 +239,13 @@ void GameLayer::update() {
 	}
 	deleteProjectiles.clear();
 
-
+	for (auto const& save : saves) {
+		if (player->isOverlap(save)) {
+			saveX = save->x;
+			saveY = save->y;
+			saved = true;
+		}
+	}
 }
 
 void GameLayer::calculateScroll() {
@@ -252,7 +272,9 @@ void GameLayer::draw() {
 	for (auto const& tile : tiles) {
 		tile->draw(scrollX);
 	}
-
+	for (auto const& save : saves) {
+		save->draw(scrollX);
+	}
 	for (auto const& projectile : projectiles) {
 		projectile->draw(scrollX);
 	}

@@ -69,6 +69,9 @@
     <ClCompile Include="Space.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Save.cpp">
+      <Filter>Archivos de origen\actores</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -107,8 +110,11 @@
     <ClInclude Include="Tile.h">
       <Filter>Archivos de encabezado\actores</Filter>
     </ClInclude>
-    <ClInclude Include="Space.h">
+    <ClInclude Include="Save.h">
       <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Space.h">
+      <Filter>Archivos de encabezado\actores</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
