@@ -11,6 +11,7 @@ void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
 	tiles.clear();
+	doors.clear();
 
 	audioBackground = new Audio("res/musica_ambiente.mp3", true);
 	audioBackground->play();
@@ -61,29 +62,36 @@ void GameLayer::loadMap(string name) {
 void GameLayer::loadMapObject(char character, float x, float y)
 {
 	switch (character) {
-	case 'E': {
-		Enemy* enemy = new Enemy(x, y, game);
-		// modificación para empezar a contar desde el suelo.
-		enemy->y = enemy->y - enemy->height / 2;
-		enemies.push_back(enemy);
-		space->addDynamicActor(enemy);
-		break;
+		case 'E': {
+			Enemy* enemy = new Enemy(x, y, game);
+			// modificación para empezar a contar desde el suelo.
+			enemy->y = enemy->y - enemy->height / 2;
+			enemies.push_back(enemy);
+			space->addDynamicActor(enemy);
+			break;
+		}
+		case 'S': {
+			player = new Player(x, y, game);
+			// modificación para empezar a contar desde el suelo.
+			player->y = player->y - player->height / 2;
+			space->addDynamicActor(player);
+			break;
+		}
+		case '#': {
+			Tile* tile = new Tile("res/bloque_tierra.png", x, y, game);
+			// modificación para empezar a contar desde el suelo.
+			tile->y = tile->y - tile->height / 2;
+			tiles.push_back(tile);
+			space->addStaticActor(tile);
+			break;
+		}
 	}
-	case '1': {
-		player = new Player(x, y, game);
-		// modificación para empezar a contar desde el suelo.
-		player->y = player->y - player->height / 2;
-		space->addDynamicActor(player);
-		break;
-	}
-	case '#': {
-		Tile* tile = new Tile("res/bloque_tierra.png", x, y, game);
-		// modificación para empezar a contar desde el suelo.
-		tile->y = tile->y - tile->height / 2;
-		tiles.push_back(tile);
-		space->addStaticActor(tile);
-		break;
-	}
+	if (isdigit(character)) {
+		int number = character - '0';
+		Door* door = new Door(x, y, game, number);
+		door->y = door->y - door->height / 2;
+		doors.push_back(door);
+		space->addDynamicActor(door);
 	}
 }
 
@@ -146,6 +154,9 @@ void GameLayer::update() {
 	}
 	for (auto const& projectile : projectiles) {
 		projectile->update();
+	}
+	for (auto const& door : doors) {
+		door->update();
 	}
 
 
@@ -225,7 +236,25 @@ void GameLayer::update() {
 	}
 	deleteProjectiles.clear();
 
+	for (auto const& door : doors) {
+		if (player->isOverlap(door) && door->tp) {
 
+			for (auto const& secondDoor : doors) {
+				if (door->number == secondDoor->number && (door->x != secondDoor->x || door->y != secondDoor->y)) {
+
+					door->cooldown = 100;
+					secondDoor->cooldown = 100;
+					door->tp = false;
+					secondDoor->tp = false;
+
+					player->x = secondDoor->x;
+					player->y = secondDoor->y;
+
+				}
+			}
+
+		}
+	}
 }
 
 void GameLayer::calculateScroll() {
@@ -264,7 +293,13 @@ void GameLayer::draw() {
 
 	backgroundPoints->draw();
 	textPoints->draw();
-	SDL_RenderPresent(game->renderer); // Renderiza
+
+	for (auto const& door : doors) {
+		door->draw(scrollX);
+	}
+	SDL_RenderPresent(game->renderer); 
+
+	
 }
 
 void GameLayer::keysToControls(SDL_Event event) {
