@@ -91,14 +91,14 @@ void GameLayer::loadMapObject(char character, float x, float y)
 			space->addStaticActor(tile);
 			break;
 		}
-	}
-	case 'A': {
-		Save* save = new Save(x, y, game);
-		// modificación para empezar a contar desde el suelo.
-		save->y = save->y - save->height / 2;
-		saves.push_back(save);
-		space->addDynamicActor(save);
-		break;
+		case 'A': {
+			Save* save = new Save(x, y, game);
+			// modificación para empezar a contar desde el suelo.
+			save->y = save->y - save->height / 2;
+			saves.push_back(save);
+			space->addDynamicActor(save);
+			break;
+		}
 	}
 	if (isdigit(character)) {
 		int number = character - '0';
@@ -255,8 +255,8 @@ void GameLayer::update() {
 			saveX = save->x;
 			saveY = save->y;
 			saved = true;
-				}
-			}
+		}
+	}
 	for (auto const& door : doors) {
 		if (player->isOverlap(door) && door->tp) {
 
@@ -271,7 +271,8 @@ void GameLayer::update() {
 					player->x = secondDoor->x;
 					player->y = secondDoor->y;
 
-
+				}
+			}
 		}
 	}
 }
