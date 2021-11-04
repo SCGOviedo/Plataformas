@@ -348,10 +348,10 @@ void GameLayer::draw() {
 		tile->draw(scrollX, scrollY);
 	}
 	for (auto const& tile : tilesDestruibles) {
-		tile->draw(scrollX);
+		tile->draw(scrollX, scrollY);
   }
 	for (auto const& save : saves) {
-		save->draw(scrollX);
+		save->draw(scrollX, scrollY);
 	}
 	for (auto const& projectile : projectiles) {
 		projectile->draw(scrollX, scrollY);
@@ -366,7 +366,7 @@ void GameLayer::draw() {
 	textPoints->draw();
 
 	for (auto const& door : doors) {
-		door->draw(scrollX);
+		door->draw(scrollX, scrollY);
 	}
 	SDL_RenderPresent(game->renderer); 
 
