@@ -8,13 +8,14 @@
 #include "Projectile.h"
 #include "Text.h"
 #include "Tile.h"
+#include "TileDestruible.h"
 #include "Save.h"
 
 #include "Audio.h"
 #include "Space.h" // importar
 
 #include <fstream> // Leer ficheros
-#include <sstream> // Leer líneas / String
+#include <sstream> // Leer lÃ­neas / String
 #include <list>
 #include "Door.h" 
 
@@ -34,6 +35,7 @@ public:
 	float scrollX;
 	int mapWidth;
 	list<Tile*> tiles;
+	list<TileDestruible*> tilesDestruibles;
 	list<Save*> saves;
 
 	Audio* audioBackground;

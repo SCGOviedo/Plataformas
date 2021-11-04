@@ -11,6 +11,7 @@ void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
 	tiles.clear();
+	tilesDestruibles.clear();
 	saves.clear();
 	doors.clear();
 
@@ -99,7 +100,15 @@ void GameLayer::loadMapObject(char character, float x, float y)
 			space->addDynamicActor(save);
 			break;
 		}
+	case 'W': {
+		TileDestruible* tile = new TileDestruible("res/bloque_metal.png", x, y, game);
+		// modificaci�n para empezar a contar desde el suelo.
+		tile->y = tile->y - tile->height / 2;
+		tilesDestruibles.push_back(tile);
+		space->addStaticActor(tile);
+		break;
 	}
+}
 	if (isdigit(character)) {
 		int number = character - '0';
 		Door* door = new Door(x, y, game, number);
@@ -268,13 +277,37 @@ void GameLayer::update() {
 					door->tp = false;
 					secondDoor->tp = false;
 
-					player->x = secondDoor->x;
-					player->y = secondDoor->y;
 
 				}
 			}
+    }
+  }
+	list<TileDestruible*> deleteTiles;
+	for (auto const& tile : tilesDestruibles) {
+		if (player->isOverlap(tile) && player->y < (tile->y-20)) {
+			tile->destroy++;
+			if (tile->destroy >= tile->duracion) {
+				bool pInList = std::find(deleteTiles.begin(),
+					deleteTiles.end(),
+					tile) != deleteTiles.end();
+
+				if (!pInList) {
+					deleteTiles.push_back(tile);
+				}
+			}
 		}
+		else {
+			tile->destroy = 0;
+		}
+	}for (auto const& tile : deleteTiles) {
+		tilesDestruibles.remove(tile);
+		space->removeStaticActor(tile);
+		delete tile;
 	}
+	deleteTiles.clear();
+					player->x = secondDoor->x;
+					player->y = secondDoor->y;
+		
 }
 
 void GameLayer::calculateScroll() {
@@ -301,6 +334,9 @@ void GameLayer::draw() {
 	for (auto const& tile : tiles) {
 		tile->draw(scrollX);
 	}
+	for (auto const& tile : tilesDestruibles) {
+		tile->draw(scrollX);
+  }
 	for (auto const& save : saves) {
 		save->draw(scrollX);
 	}
