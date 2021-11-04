@@ -18,7 +18,7 @@ Enemy::Enemy(float x, float y, Game* game)
 
 }
 
-void Enemy::update() {
+void Enemy::update(float playerX) {
 	// Actualizar la animación
 	bool endAnimation = animation->update();
 
@@ -40,13 +40,18 @@ void Enemy::update() {
 
 	// Establecer velocidad
 	if (state != game->stateDying) {
-		// no está muerto y se ha quedado parado
-		if (vx == 0) {
-			vxIntelligence = vxIntelligence * -1;
-			vx = vxIntelligence;
+		// no está muerto y busca al jugador
+		if (x<playerX) {
+			vx = 1;
+		}
+		else if (x > playerX) {
+			vx = -1;
+		}
+		else {
+			vx = 0;//si está en la posición del jugador, para que no "parpadeé"
 		}
 	}
-	else {
+	else {//muerto
 		vx = 0;
 	}
 
