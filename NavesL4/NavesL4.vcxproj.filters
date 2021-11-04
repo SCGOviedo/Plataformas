@@ -70,6 +70,8 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="TileDestruible.cpp">
+    <ClCompile Include="Save.cpp">
+    <ClCompile Include="Door.cpp">
       <Filter>Archivos de origen\actores</Filter>
     </ClCompile>
   </ItemGroup>
@@ -110,10 +112,12 @@
     <ClInclude Include="Tile.h">
       <Filter>Archivos de encabezado\actores</Filter>
     </ClInclude>
-    <ClInclude Include="Space.h">
+    <ClInclude Include="Save.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="TileDestruible.h">
+    <ClInclude Include="Space.h">
+    <ClInclude Include="Door.h">
       <Filter>Archivos de encabezado\actores</Filter>
     </ClInclude>
   </ItemGroup>
