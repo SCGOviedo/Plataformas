@@ -12,6 +12,9 @@ void GameLayer::init() {
 	scrollX = 0;
 	scrollY = 0;
 	tiles.clear();
+	tilesDestruibles.clear();
+	saves.clear();
+	doors.clear();
 
 	audioBackground = new Audio("res/musica_ambiente.mp3", true);
 	audioBackground->play();
@@ -29,6 +32,11 @@ void GameLayer::init() {
 	projectiles.clear(); // Vaciar por si reiniciamos el juego
 
 	loadMap("res/0.txt");
+	
+	if(saved){
+		player->x = saveX;
+		player->y = saveY;
+	}
 }
 
 void GameLayer::loadMap(string name) {
@@ -40,13 +48,12 @@ void GameLayer::loadMap(string name) {
 		return;
 	}
 	else {
-		// Por l韓ea
+		// Por l锟絥ea
 		mapHeight = 0;
 		for (int i = 0; getline(streamFile, line); i++) {
 			istringstream streamLine(line);
 			mapWidth = line.length() * 40; // Ancho del mapa en pixels
 			mapHeight += 40;
-			// Por car醕ter (en cada l韓ea)
 			for (int j = 0; !streamLine.eof(); j++) {
 				streamLine >> character; // Leer character 
 				cout << character;
@@ -64,29 +71,52 @@ void GameLayer::loadMap(string name) {
 void GameLayer::loadMapObject(char character, float x, float y)
 {
 	switch (character) {
-	case 'E': {
-		Enemy* enemy = new Enemy(x, y, game);
-		// modificaci髇 para empezar a contar desde el suelo.
-		enemy->y = enemy->y - enemy->height / 2;
-		enemies.push_back(enemy);
-		space->addDynamicActor(enemy);
-		break;
-	}
-	case '1': {
-		player = new Player(x, y, game);
-		// modificaci髇 para empezar a contar desde el suelo.
-		player->y = player->y - player->height / 2;
-		space->addDynamicActor(player);
-		break;
-	}
-	case '#': {
-		Tile* tile = new Tile("res/bloque_tierra.png", x, y, game);
-		// modificaci髇 para empezar a contar desde el suelo.
+		case 'E': {
+			Enemy* enemy = new Enemy(x, y, game);
+			// modificaci贸n para empezar a contar desde el suelo.
+			enemy->y = enemy->y - enemy->height / 2;
+			enemies.push_back(enemy);
+			space->addDynamicActor(enemy);
+			break;
+		}
+		case 'S': {
+			player = new Player(x, y, game);
+			// modificaci贸n para empezar a contar desde el suelo.
+			player->y = player->y - player->height / 2;
+			space->addDynamicActor(player);
+			break;
+		}
+		case '#': {
+			Tile* tile = new Tile("res/bloque_tierra.png", x, y, game);
+			// modificaci贸n para empezar a contar desde el suelo.
+			tile->y = tile->y - tile->height / 2;
+			tiles.push_back(tile);
+			space->addStaticActor(tile);
+			break;
+		}
+		case 'A': {
+			Save* save = new Save(x, y, game);
+			// modificaci贸n para empezar a contar desde el suelo.
+			save->y = save->y - save->height / 2;
+			saves.push_back(save);
+			space->addDynamicActor(save);
+			break;
+		}
+	case 'W': {
+		TileDestruible* tile = new TileDestruible("res/bloque_metal.png", x, y, game);
+		// modificaci锟絥 para empezar a contar desde el suelo.
 		tile->y = tile->y - tile->height / 2;
-		tiles.push_back(tile);
+		tilesDestruibles.push_back(tile);
 		space->addStaticActor(tile);
 		break;
 	}
+}
+	if (isdigit(character)) {
+		int number = character - '0';
+		Door* door = new Door(x, y, game, number);
+		door->y = door->y - door->height / 2;
+		doors.push_back(door);
+		space->addDynamicActor(door);
 	}
 }
 
@@ -145,10 +175,13 @@ void GameLayer::update() {
 	background->update();
 	player->update();
 	for (auto const& enemy : enemies) {
-		enemy->update();
+		enemy->update(player->x);
 	}
 	for (auto const& projectile : projectiles) {
 		projectile->update();
+	}
+	for (auto const& door : doors) {
+		door->update();
 	}
 
 
@@ -228,7 +261,53 @@ void GameLayer::update() {
 	}
 	deleteProjectiles.clear();
 
+	for (auto const& save : saves) {
+		if (player->isOverlap(save)) {
+			saveX = save->x;
+			saveY = save->y;
+			saved = true;
+		}
+	}
+	for (auto const& door : doors) {
+		if (player->isOverlap(door) && door->tp) {
 
+			for (auto const& secondDoor : doors) {
+				if (door->number == secondDoor->number && (door->x != secondDoor->x || door->y != secondDoor->y)) {
+					door->cooldown = 100;
+					secondDoor->cooldown = 100;
+					door->tp = false;
+					secondDoor->tp = false;
+
+					player->x = secondDoor->x;
+					player->y = secondDoor->y;
+
+				}
+			}
+    }
+  }
+	list<TileDestruible*> deleteTiles;
+	for (auto const& tile : tilesDestruibles) {
+		if (player->isOverlap(tile) && player->y < (tile->y-20)) {
+			tile->destroy++;
+			if (tile->destroy >= tile->duracion) {
+				bool pInList = std::find(deleteTiles.begin(),
+					deleteTiles.end(),
+					tile) != deleteTiles.end();
+
+				if (!pInList) {
+					deleteTiles.push_back(tile);
+				}
+			}
+		}
+		else {
+			tile->destroy = 0;
+		}
+	}for (auto const& tile : deleteTiles) {
+		tilesDestruibles.remove(tile);
+		space->removeStaticActor(tile);
+		delete tile;
+	}
+	deleteTiles.clear();
 }
 
 void GameLayer::calculateScroll() {
@@ -268,7 +347,12 @@ void GameLayer::draw() {
 	for (auto const& tile : tiles) {
 		tile->draw(scrollX, scrollY);
 	}
-
+	for (auto const& tile : tilesDestruibles) {
+		tile->draw(scrollX);
+  }
+	for (auto const& save : saves) {
+		save->draw(scrollX);
+	}
 	for (auto const& projectile : projectiles) {
 		projectile->draw(scrollX, scrollY);
 	}
@@ -280,7 +364,13 @@ void GameLayer::draw() {
 
 	backgroundPoints->draw();
 	textPoints->draw();
-	SDL_RenderPresent(game->renderer); // Renderiza
+
+	for (auto const& door : doors) {
+		door->draw(scrollX);
+	}
+	SDL_RenderPresent(game->renderer); 
+
+	
 }
 
 void GameLayer::keysToControls(SDL_Event event) {
