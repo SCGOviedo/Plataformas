@@ -8,13 +8,16 @@
 #include "Projectile.h"
 #include "Text.h"
 #include "Tile.h"
+#include "TileDestruible.h"
+#include "Save.h"
 
 #include "Audio.h"
 #include "Space.h" // importar
 
 #include <fstream> // Leer ficheros
-#include <sstream> // Leer líneas / String
+#include <sstream> // Leer lÃ­neas / String
 #include <list>
+#include "Door.h" 
 
 class GameLayer : public Layer
 {
@@ -32,6 +35,8 @@ public:
 	float scrollX;
 	int mapWidth;
 	list<Tile*> tiles;
+	list<TileDestruible*> tilesDestruibles;
+	list<Save*> saves;
 
 	Audio* audioBackground;
 	Text* textPoints;
@@ -42,10 +47,15 @@ public:
 	Actor* backgroundPoints;
 	list<Enemy*> enemies;
 	list<Projectile*> projectiles;
+	list<Door*> doors;
 
 	bool controlShoot = false;
 	int controlMoveY = 0;
 	int controlMoveX = 0;
+
+	float saveX;
+	float saveY;
+	bool saved = false;
 
 
 };
