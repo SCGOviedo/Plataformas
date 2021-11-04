@@ -8,6 +8,7 @@
 #include "Projectile.h"
 #include "Text.h"
 #include "Tile.h"
+#include "Save.h"
 
 #include "Audio.h"
 #include "Space.h" // importar
@@ -33,6 +34,7 @@ public:
 	float scrollX;
 	int mapWidth;
 	list<Tile*> tiles;
+	list<Save*> saves;
 
 	Audio* audioBackground;
 	Text* textPoints;
@@ -48,6 +50,10 @@ public:
 	bool controlShoot = false;
 	int controlMoveY = 0;
 	int controlMoveX = 0;
+
+	float saveX;
+	float saveY;
+	bool saved = false;
 
 
 };

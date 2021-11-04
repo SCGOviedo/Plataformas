@@ -11,6 +11,7 @@ void GameLayer::init() {
 	space = new Space(1);
 	scrollX = 0;
 	tiles.clear();
+	saves.clear();
 	doors.clear();
 
 	audioBackground = new Audio("res/musica_ambiente.mp3", true);
@@ -29,6 +30,11 @@ void GameLayer::init() {
 	projectiles.clear(); // Vaciar por si reiniciamos el juego
 
 	loadMap("res/0.txt");
+	
+	if(saved){
+		player->x = saveX;
+		player->y = saveY;
+	}
 }
 
 void GameLayer::loadMap(string name) {
@@ -40,11 +46,11 @@ void GameLayer::loadMap(string name) {
 		return;
 	}
 	else {
-		// Por l韓ea
+		// Por l铆nea
 		for (int i = 0; getline(streamFile, line); i++) {
 			istringstream streamLine(line);
 			mapWidth = line.length() * 40; // Ancho del mapa en pixels
-			// Por car醕ter (en cada l韓ea)
+			// Por car谩cter (en cada l铆nea)
 			for (int j = 0; !streamLine.eof(); j++) {
 				streamLine >> character; // Leer character 
 				cout << character;
@@ -64,7 +70,7 @@ void GameLayer::loadMapObject(char character, float x, float y)
 	switch (character) {
 		case 'E': {
 			Enemy* enemy = new Enemy(x, y, game);
-			// modificaci髇 para empezar a contar desde el suelo.
+			// modificaci贸n para empezar a contar desde el suelo.
 			enemy->y = enemy->y - enemy->height / 2;
 			enemies.push_back(enemy);
 			space->addDynamicActor(enemy);
@@ -72,19 +78,27 @@ void GameLayer::loadMapObject(char character, float x, float y)
 		}
 		case 'S': {
 			player = new Player(x, y, game);
-			// modificaci髇 para empezar a contar desde el suelo.
+			// modificaci贸n para empezar a contar desde el suelo.
 			player->y = player->y - player->height / 2;
 			space->addDynamicActor(player);
 			break;
 		}
 		case '#': {
 			Tile* tile = new Tile("res/bloque_tierra.png", x, y, game);
-			// modificaci髇 para empezar a contar desde el suelo.
+			// modificaci贸n para empezar a contar desde el suelo.
 			tile->y = tile->y - tile->height / 2;
 			tiles.push_back(tile);
 			space->addStaticActor(tile);
 			break;
 		}
+	}
+	case 'A': {
+		Save* save = new Save(x, y, game);
+		// modificaci贸n para empezar a contar desde el suelo.
+		save->y = save->y - save->height / 2;
+		saves.push_back(save);
+		space->addDynamicActor(save);
+		break;
 	}
 	if (isdigit(character)) {
 		int number = character - '0';
@@ -236,6 +250,13 @@ void GameLayer::update() {
 	}
 	deleteProjectiles.clear();
 
+	for (auto const& save : saves) {
+		if (player->isOverlap(save)) {
+			saveX = save->x;
+			saveY = save->y;
+			saved = true;
+				}
+			}
 	for (auto const& door : doors) {
 		if (player->isOverlap(door) && door->tp) {
 
@@ -250,8 +271,6 @@ void GameLayer::update() {
 					player->x = secondDoor->x;
 					player->y = secondDoor->y;
 
-				}
-			}
 
 		}
 	}
@@ -281,7 +300,9 @@ void GameLayer::draw() {
 	for (auto const& tile : tiles) {
 		tile->draw(scrollX);
 	}
-
+	for (auto const& save : saves) {
+		save->draw(scrollX);
+	}
 	for (auto const& projectile : projectiles) {
 		projectile->draw(scrollX);
 	}
