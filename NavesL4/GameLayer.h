@@ -15,6 +15,7 @@
 #include <fstream> // Leer ficheros
 #include <sstream> // Leer líneas / String
 #include <list>
+#include "Door.h" 
 
 class GameLayer : public Layer
 {
@@ -42,6 +43,7 @@ public:
 	Actor* backgroundPoints;
 	list<Enemy*> enemies;
 	list<Projectile*> projectiles;
+	list<Door*> doors;
 
 	bool controlShoot = false;
 	int controlMoveY = 0;
