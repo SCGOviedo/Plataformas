@@ -277,6 +277,8 @@ void GameLayer::update() {
 					door->tp = false;
 					secondDoor->tp = false;
 
+					player->x = secondDoor->x;
+					player->y = secondDoor->y;
 
 				}
 			}
@@ -305,8 +307,6 @@ void GameLayer::update() {
 		delete tile;
 	}
 	deleteTiles.clear();
-					player->x = secondDoor->x;
-					player->y = secondDoor->y;
 		
 }
 
