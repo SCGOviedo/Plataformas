@@ -33,7 +33,9 @@ public:
 	void calculateScroll();
 	Space* space;
 	float scrollX;
+	float scrollY;
 	int mapWidth;
+	int mapHeight;
 	list<Tile*> tiles;
 	list<TileDestruible*> tilesDestruibles;
 	list<Save*> saves;
